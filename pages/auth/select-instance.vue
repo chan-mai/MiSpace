@@ -18,7 +18,7 @@ const login = (instance: string | undefined) => {
     // UUIDの生成
     const session: string = uuidv4();
     // callbackURLの生成
-    const callbackURL = new URL(window.location.href).hostname + "/auth/callback";
+    const callbackURL = new URL(window.location.href).protocol + new URL(window.location.href).hostname + "/auth/callback";
 
     // URL以降のパスを削除しhttps://{host}/miauth/{session}に置き換え
     const url = new URL(instance);
@@ -28,6 +28,8 @@ const login = (instance: string | undefined) => {
     url.searchParams.append('name', 'MiSpace');
     url.searchParams.append('permission', 'read:account');
     url.searchParams.append('callback', callbackURL);
+
+    sessionStorage.setItem('instance', instance);
 
     // リダイレクト
     return navigateTo(url.href, { external: true, });
@@ -49,7 +51,7 @@ const login = (instance: string | undefined) => {
                     <!-- End Title -->
 
                     <div class="mt-8 grid">
-                        <button type="button" class="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-green-600 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                        <button type="button" @click="login('https://misskey.io')" class="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-green-600 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
                         Sign up with misskey.io
                         </button>
                     </div>
