@@ -10,24 +10,36 @@ const login = (instance: string | undefined) => {
     }
 
     // instance.valueにhttps://を含むかどうか
-    if (!instance?.startsWith('https://')) {
+    // http://から始まる場合はhttps://に変換
+    if (!instance?.startsWith('https://') && !instance?.startsWith('http://')) {
         instance = 'https://' + instance
+    } else if (instance?.startsWith('http://')) {
+        instance = instance.replace('http://', 'https://')
     }
-    
 
     // UUIDの生成
     const session: string = uuidv4();
+    const currentURL = new URL(window.location.href);
+    // ポート番号の取得
+    const portString = currentURL.port !== '' ? `:${currentURL.port}` : '';
     // callbackURLの生成
-    const callbackURL = new URL(window.location.href).protocol + new URL(window.location.href).hostname + "/auth/callback";
+    const callbackURL = `${currentURL.protocol}${currentURL.hostname}${portString}/auth/callback`;
 
     // URL以降のパスを削除しhttps://{host}/miauth/{session}に置き換え
     const url = new URL(instance);
-    url.pathname = '/miauth/' + session;
+    url.pathname = `/miauth/${session}`;
+
     // パラメタ系
     // ?name=MiSpace&permission=read:account&callback
-    url.searchParams.append('name', 'MiSpace');
-    url.searchParams.append('permission', 'read:account');
-    url.searchParams.append('callback', callbackURL);
+    const params = {
+        'name': process.env?.NODE_ENV === 'development' ? 'MiSpace (dev)' : 'MiSpace',
+        'permission': 'read:account',
+        'callback': callbackURL,
+    };
+
+    for (const [key, value] of Object.entries(params)) {
+        url.searchParams.append(key, value);
+    }
 
     sessionStorage.setItem('instance', instance);
 
@@ -61,7 +73,7 @@ const login = (instance: string | undefined) => {
                     <form @submit.prevent="login(instance)">
                         <div class="mb-4">
                         <label for="hs-hero-password-2" class="block text-sm font-medium dark:text-white"><span class="sr-only">Password</span></label>
-                        <input type="text" v-model="instance" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="インスタンスURL" required>
+                        <input type="text" v-model="instance" autocomplete="on" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="インスタンスURL" required>
                         </div>
 
                         <div class="grid">
