@@ -11,47 +11,18 @@
         }
 
         // トークンの取得
-        /*await fetch(
-            `/api/getToken`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    session: session,
-                    instance: instance
-                })
-            }
-        ).then((data: any) => {
-            console.log(data);
-            console.log(data.body);
-            console.log(data.ok, data.token);
 
-        });*/
+        const { user, token } = await useMiAuthCheck(instance, session);
+        console.log(user);
+        console.log(token);
 
-        $fetch(
-            `${instance}/api/miauth/${session}/check`,
-            {
-                method: 'POST',
-            }
-        ).then((data: any) => {
-            console.log(data);
-            console.log(data.ok, data.token);
-
-            if( data?.ok && data?.token !== undefined ) {
-                sessionStorage.setItem('token', data.token);
-            } else {
-                console.error('token not found');
-                navigateTo('/auth/select-instance');
-            }
-        });
-
-        
+        if( token != null ) {
+            sessionStorage.setItem('token', token);
+        } else {
+            console.error('token not found');
+            navigateTo('/auth/select-instance');
+        }
     });
-
-    
-
 </script>
 
 <template>

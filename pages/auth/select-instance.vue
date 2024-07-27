@@ -10,24 +10,36 @@ const login = (instance: string | undefined) => {
     }
 
     // instance.valueにhttps://を含むかどうか
-    if (!instance?.startsWith('https://')) {
+    // http://から始まる場合はhttps://に変換
+    if (!instance?.startsWith('https://') && !instance?.startsWith('http://')) {
         instance = 'https://' + instance
+    } else if (instance?.startsWith('http://')) {
+        instance = instance.replace('http://', 'https://')
     }
-    
 
     // UUIDの生成
     const session: string = uuidv4();
+    const currentURL = new URL(window.location.href);
+    // ポート番号の取得
+    const portString = currentURL.port !== '' ? `:${currentURL.port}` : '';
     // callbackURLの生成
-    const callbackURL = new URL(window.location.href).protocol + new URL(window.location.href).hostname + "/auth/callback";
+    const callbackURL = `${currentURL.protocol}${currentURL.hostname}${portString}/auth/callback`;
 
     // URL以降のパスを削除しhttps://{host}/miauth/{session}に置き換え
     const url = new URL(instance);
-    url.pathname = '/miauth/' + session;
+    url.pathname = `/miauth/${session}`;
+
     // パラメタ系
     // ?name=MiSpace&permission=read:account&callback
-    url.searchParams.append('name', 'MiSpace');
-    url.searchParams.append('permission', 'read:account');
-    url.searchParams.append('callback', callbackURL);
+    const params = {
+        'name': process.env?.NODE_ENV === 'development' ? 'MiSpace (dev)' : 'MiSpace',
+        'permission': 'read:account',
+        'callback': callbackURL,
+    };
+
+    for (const [key, value] of Object.entries(params)) {
+        url.searchParams.append(key, value);
+    }
 
     sessionStorage.setItem('instance', instance);
 
