@@ -10,6 +10,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "livekit-client": "^2.4.2",
+    "livekit-server-sdk": "^2.6.0",
     "miauth-js": "^0.0.6",
     "nuxt": "^3.12.4",
     "preline": "^2.4.0",
